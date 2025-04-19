@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>КРУТИМ КЕЙСЫ</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #ffcc00;
+            margin-bottom: 30px;
+        }
+        
+        .battle-area {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .player {
+            width: 48%;
+            background-color: #2a2a2a;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        
+        .player-name {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #ffcc00;
+        }
+        
+        .case-display {
+            height: 200px;
+            background-color: #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .item {
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #444;
+        }
+        
+        .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .controls {
+            margin-top: 30px;
+        }
+        
+        button {
+            background-color: #ffcc00;
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0 10px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background-color: #ffdd33;
+            transform: scale(1.05);
+        }
+        
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .balance {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .history {
+            margin-top: 30px;
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #444;
+        }
+        
+        .winner {
+            animation: glow 1s infinite alternate;
+            border: 2px solid gold;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 10px gold;
+            }
+            to {
+                box-shadow: 0 0 20px gold;
+            }
+        }
+        
+        .items-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .item-box {
+            width: 80px;
+            height: 80px;
+            background-color: #333;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .item-box .value {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            font-size: 10px;
+            background-color: rgba(0,0,0,0.7);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>КРУТИМ КЕЙСЫ</h1>
+        
+        <div class="balance">
+            ТВОЙ БАЛАНС: ₽<span id="userBalance">1000.00</span>
+        </div>
+        
+        <div class="battle-area">
+            <div class="player" id="player1">
+                <div class="player-name">ТЫ</div>
+                <div class="case-display">
+                    <div class="item">Нажми "Открыть кейс" чтобы начать</div>
+                </div>
+                <div class="value">0.00₽</div>
+            </div>
+            
+            <div class="player" id="player2">
+                <div class="player-name">Оппонент</div>
+                <div class="case-display">
+                    <div class="item">Подождите...</div>
+                </div>
+                <div class="value">0.00₽</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="openCase">Открыть кейс (10.00₽)</button>
+            <button id="newBattle" disabled>Новое сражение</button>
+        </div>
+        
+        <div class="items-list">
+            <h3>Возможные предметы:</h3>
+            <div id="possibleItems"></div>
+        </div>
+        
+        <div class="history">
+            <h3>История матчей</h3>
+            <div id="historyLog"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Possible items with their values
+        const items = [
+            { name: "Керамбит | Гамма-Волны Изумруд", value: 1587216 },
+            { name: "Dragon Lore", value: 800 },
+            { name: "Butterfly Knife", value: 600 },
+            { name: "AWP Asiimov", value: 400 },
+            { name: "M4A4 Howl", value: 300 },
+            { name: "AK-47 Vulcan", value: 200 },
+            { name: "Glock Fade", value: 150 },
+            { name: "P250 Sand Dune", value: 100 },
+            { name: "USP-S Guardian", value: 80 },
+            { name: "P90 Death by Kitty", value: 60 },
+            { name: "FAMAS Pulse", value: 40 },
+            { name: "Galil AR Eco", value: 20 },
+            { name: "MP7 Whiteout", value: 10 },
+            { name: "Five-SeveN Monkey Business", value: 5 },
+            { name: "Desert Eagle Bronze Deco", value: 2 }
+        ];
+        
+        // Game state
+        let balance = 1000;
+        let battleInProgress = false;
+        let player1Item = null;
+        let player2Item = null;
+        
+        // DOM elements
+        const openCaseBtn = document.getElementById('openCase');
+        const newBattleBtn = document.getElementById('newBattle');
+        const userBalanceEl = document.getElementById('userBalance');
+        const player1Display = document.querySelector('#player1 .case-display');
+        const player2Display = document.querySelector('#player2 .case-display');
+        const player1ItemEl = document.querySelector('#player1 .item');
+        const player2ItemEl = document.querySelector('#player2 .item');
+        const player1ValueEl = document.querySelector('#player1 .value');
+        const player2ValueEl = document.querySelector('#player2 .value');
+        const historyLog = document.getElementById('historyLog');
+        const possibleItemsContainer = document.getElementById('possibleItems');
+        
+        // Initialize possible items display
+        items.forEach(item => {
+            const itemBox = document.createElement('div');
+            itemBox.className = 'item-box';
+            itemBox.innerHTML = `${item.name}<span class="value">$${item.value.toFixed(2)}</span>`;
+            possibleItemsContainer.appendChild(itemBox);
+        });
+        
+        // Event listeners
+        openCaseBtn.addEventListener('click', startBattle);
+        newBattleBtn.addEventListener('click', resetBattle);
+        
+        function startBattle() {
+            if (battleInProgress) return;
+            if (balance < 10) {
+                alert('Not enough balance!');
+                return;
+            }
+            
+            // Deduct balance
+            balance -= 10;
+            updateBalance();
+            
+            battleInProgress = true;
+            openCaseBtn.disabled = true;
+            
+            // Reset displays
+            player1ItemEl.textContent = 'Opening...';
+            player2ItemEl.textContent = 'Opening...';
+            player1ValueEl.textContent = '$0.00';
+            player2ValueEl.textContent = '$0.00';
+            
+            // Simulate case opening with delay
+            setTimeout(() => {
+                // Get random items for both players
+                player1Item = getRandomItem();
+                player2Item = getRandomItem();
+                
+                // Update displays
+                player1ItemEl.textContent = player1Item.name;
+                player1ValueEl.textContent = `$${player1Item.value.toFixed(2)}`;
+                player1ValueEl.style.color = getValueColor(player1Item.value);
+                
+                player2ItemEl.textContent = player2Item.name;
+                player2ValueEl.textContent = `$${player2Item.value.toFixed(2)}`;
+                player2ValueEl.style.color = getValueColor(player2Item.value);
+                
+                // Determine winner
+                setTimeout(() => {
+                    if (player1Item.value > player2Item.value) {
+                        player1Display.classList.add('winner');
+                        const winnings = player1Item.value;
+                        balance += winnings;
+                        updateBalance();
+                        addToHistory(`You won with ${player1Item.name} ($${player1Item.value.toFixed(2)}) vs ${player2Item.name} ($${player2Item.value.toFixed(2)}) +$${winnings.toFixed(2)}`);
+                    } else if (player2Item.value > player1Item.value) {
+                        player2Display.classList.add('winner');
+                        addToHistory(`You lost with ${player1Item.name} ($${player1Item.value.toFixed(2)}) vs ${player2Item.name} ($${player2Item.value.toFixed(2)})`);
+                    } else {
+                        // Tie - return the bet
+                        balance += 10;
+                        updateBalance();
+                        addToHistory(`Tie with ${player1Item.name} ($${player1Item.value.toFixed(2)}) vs ${player2Item.name} ($${player2Item.value.toFixed(2)}) +$10.00 returned`);
+                    }
+                    
+                    newBattleBtn.disabled = false;
+                    battleInProgress = false;
+                }, 1000);
+            }, 2000);
+        }
+        
+        function resetBattle() {
+            player1Display.classList.remove('winner');
+            player2Display.classList.remove('winner');
+            
+            player1ItemEl.textContent = 'Click "Open Case" to start';
+            player2ItemEl.textContent = 'Waiting...';
+            player1ValueEl.textContent = '$0.00';
+            player2ValueEl.textContent = '$0.00';
+            player1ValueEl.style.color = '#4CAF50';
+            player2ValueEl.style.color = '#4CAF50';
+            
+            openCaseBtn.disabled = false;
+            newBattleBtn.disabled = true;
+            
+            player1Item = null;
+            player2Item = null;
+        }
+        
+        function getRandomItem() {
+            // Weighted random - higher value items are rarer
+            const weightedItems = [];
+            
+            items.forEach(item => {
+                // Higher value = fewer copies in the weighted array
+                const copies = Math.max(1, 20 - Math.sqrt(item.value));
+                for (let i = 0; i < copies; i++) {
+                    weightedItems.push(item);
+                }
+            });
+            
+            const randomIndex = Math.floor(Math.random() * weightedItems.length);
+            return {...weightedItems[randomIndex]}; // Return a copy
+        }
+        
+        function getValueColor(value) {
+            if (value >= 500) return '#FFD700'; // Gold
+            if (value >= 200) return '#FF6347'; // Tomato
+            if (value >= 100) return '#1E90FF'; // DodgerBlue
+            return '#4CAF50'; // Green
+        }
+        
+        function updateBalance() {
+            userBalanceEl.textContent = balance.toFixed(2);
+        }
+        
+        function addToHistory(text) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.innerHTML = `<span>${text}</span><span>${timeString}</span>`;
+            
+            historyLog.insertBefore(historyItem, historyLog.firstChild);
+            
+            // Limit history to 10 items
+            if (historyLog.children.length > 10) {
+                historyLog.removeChild(historyLog.lastChild);
+            }
+        }
+    </script>
+</body>
+  </html>
