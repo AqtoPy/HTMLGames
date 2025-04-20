@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS2 Case Opener</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #f0c808;
+            text-shadow: 0 0 5px #f0c808;
+        }
+        
+        .case-image {
+            width: 300px;
+            height: 200px;
+            margin: 20px auto;
+            background-image: url('https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FAR17P7NdDBA7cyzl4S0h_TmJ4Tdn2xZ_Pp9i_vG8Y3nj1ak_kZpY2j3I9KSdQ9sYw6D-lLqyO_rhcK7vZ6Yz3Ux6SQj4SnDn0a2mUtLTw');
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .case-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .open-btn {
+            background-color: #f0c808;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: background-color 0.3s;
+        }
+        
+        .open-btn:hover {
+            background-color: #ffd700;
+        }
+        
+        .result {
+            margin-top: 30px;
+            min-height: 150px;
+            display: none;
+        }
+        
+        .item {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            border: 2px solid #f0c808;
+        }
+        
+        .item img {
+            width: 100px;
+            height: 75px;
+        }
+        
+        .item-name {
+            color: #f0c808;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .item-rarity {
+            font-size: 12px;
+        }
+        
+        .blue { color: #5d9cec; }
+        .purple { color: #ac92ec; }
+        .pink { color: #ec87c0; }
+        .red { color: #ed5565; }
+        .gold { color: #f0c808; }
+        
+        .inventory {
+            margin-top: 40px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+        
+        .inventory-items {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CS2 CASE OPENER</h1>
+        <p>Попробуйте свою удачу и откройте кейс с редкими скинами!</p>
+        
+        <div class="case-image" id="caseImage"></div>
+        <button class="open-btn" id="openBtn">ОТКРЫТЬ КЕЙС (₽199)</button>
+        
+        <div class="result" id="result">
+            <h2>ВЫ ВЫИГРАЛИ:</h2>
+            <div class="item">
+                <img src="https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FAR17P7NdDBA7cyzl4S0h_TmJ4Tdn2xZ_Pp9i_vG8Y3nj1ak_kZpY2j3I9KSdQ9sYw6D-lLqyO_rhcK7vZ6Yz3Ux6SQj4SnDn0a2mUtLTw" alt="CS2 Item">
+                <div class="item-name">AWP | Красная линия</div>
+                <div class="item-rarity purple">★ Редкое качество ★</div>
+            </div>
+        </div>
+        
+        <div class="inventory">
+            <h2>ВАШ ИНВЕНТАРЬ</h2>
+            <div class="inventory-items">
+                <!-- Здесь будут отображаться выигранные предметы -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const items = [
+            { name: "P250 | Песчаная дюна", rarity: "blue", image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpopujwezhz3MzbcDNG09GzkImemrmlYumGwW0H65Z337uQpNTw3wLi_RE_ZG-lLYWWI1VrMlDY-la2yL_om9bi609Wg2uD/62fx62fdpx2x" },
+            { name: "Glock-18 | Костяная роспись", rarity: "blue", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FAR17P7NdDBA7cyzl4S0h_TmJ4Tdn2xZ_Pp9i_vG8Y3nj1ak_kZpY2j3I9KSdQ9sYw6D-lLqyO_rhcK7vZ6Yz3Ux6SQj4SnDn0a2mUtLTw" },
+            { name: "USP-S | Кровавый тигр", rarity: "purple", image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpoo6m1FBRp3_bGcjhQ09Svq5KOk-P9NL7DqWdY781lxO-Z9Nul2wLm-UNuNTr3dtWXdAFvYg2F_Ae2wrq9gpXquszLmHQ36yM8pSGKO4Vc8KU/360fx360f" },
+            { name: "AK-47 | Красная линия", rarity: "purple", image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVS7cYg3LuT94qm21GyqUpsa2j7IIDDJwI7YwvRrFi7lOa5hpfpvs_A1zI97fpmYHCU/360fx360f" },
+            { name: "AWP | Электрический горилль", rarity: "pink", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA" },
+            { name: "M4A4 | Королевский рыцарь", rarity: "red", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA" },
+            { name: "Нож | Бабочка | Ультрафиолет", rarity: "gold", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA" }
+        ];
+        
+        const rarityColors = {
+            blue: "#5d9cec",
+            purple: "#ac92ec",
+            pink: "#ec87c0",
+            red: "#ed5565",
+            gold: "#f0c808"
+        };
+        
+        const rarityNames = {
+            blue: "Промышленное качество",
+            purple: "Армейское качество",
+            pink: "Запрещенное качество",
+            red: "Тайное качество",
+            gold: "Тайное качество"
+        };
+        
+        document.getElementById('openBtn').addEventListener('click', function() {
+            // Анимация открытия кейса
+            this.disabled = true;
+            this.textContent = "ОТКРЫВАЕТСЯ...";
+            
+            // Имитация анимации открытия
+            setTimeout(() => {
+                // Выбираем случайный предмет (с учетом редкости)
+                const random = Math.random();
+                let item;
+                
+                if (random < 0.5) {
+                    item = items[0]; // 50% шанс на синий
+                } else if (random < 0.8) {
+                    item = items[1]; // 30% шанс на синий
+                } else if (random < 0.9) {
+                    item = items[2]; // 10% шанс на фиолетовый
+                } else if (random < 0.95) {
+                    item = items[3]; // 5% шанс на фиолетовый
+                } else if (random < 0.98) {
+                    item = items[4]; // 3% шанс на розовый
+                } else if (random < 0.995) {
+                    item = items[5]; // 1.5% шанс на красный
+                } else {
+                    item = items[6]; // 0.5% шанс на нож (золотой)
+                }
+                
+                // Показываем результат
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <h2>ВЫ ВЫИГРАЛИ:</h2>
+                    <div class="item">
+                        <img src="${item.image}" alt="${item.name}">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-rarity" style="color: ${rarityColors[item.rarity]}">★ ${rarityNames[item.rarity]} ★</div>
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+                
+                // Добавляем предмет в инвентарь
+                const inventory = document.querySelector('.inventory-items');
+                const newItem = document.createElement('div');
+                newItem.className = 'item';
+                newItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-rarity" style="color: ${rarityColors[item.rarity]}">${rarityNames[item.rarity]}</div>
+                `;
+                inventory.appendChild(newItem);
+                
+                // Возвращаем кнопку в исходное состояние
+                this.disabled = false;
+                this.textContent = "ОТКРЫТЬ КЕЙС (₽199)";
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
