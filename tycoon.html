@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Tycoon Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .game-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .money-display {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            color: #27ae60;
+        }
+        
+        .click-area {
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: transform 0.1s;
+        }
+        
+        .click-area:active {
+            transform: scale(0.95);
+        }
+        
+        .upgrades {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .upgrade {
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            padding: 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .upgrade:hover {
+            background-color: #d6eaf8;
+        }
+        
+        .upgrade h3 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+        
+        .upgrade .cost {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .upgrade .owned {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        
+        .stats {
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #27ae60;
+        }
+        
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Business Tycoon</h1>
+        
+        <div class="money-display">
+            $<span id="money">0</span>
+            <div id="money-per-second">($0 per second)</div>
+        </div>
+        
+        <div class="click-area" id="click-area">
+            <h2>Click to Earn Money</h2>
+            <p>+$<span id="click-value">1</span> per click</p>
+        </div>
+        
+        <div class="upgrades">
+            <div class="upgrade" id="upgrade-click">
+                <h3>Better Clicks</h3>
+                <p>Increase money per click by 1</p>
+                <p class="cost">Cost: $<span id="click-upgrade-cost">10</span></p>
+                <p class="owned">Owned: <span id="click-upgrades">0</span></p>
+                <button onclick="buyClickUpgrade()">Buy</button>
+            </div>
+            
+            <div class="upgrade" id="upgrade-auto">
+                <h3>Assistant</h3>
+                <p>Earn money automatically</p>
+                <p class="cost">Cost: $<span id="auto-upgrade-cost">50</span></p>
+                <p class="owned">Owned: <span id="auto-upgrades">0</span></p>
+                <button onclick="buyAutoUpgrade()">Buy</button>
+            </div>
+            
+            <div class="upgrade" id="upgrade-business">
+                <h3>Small Business</h3>
+                <p>Earns $5 every second</p>
+                <p class="cost">Cost: $<span id="business-cost">500</span></p>
+                <p class="owned">Owned: <span id="businesses">0</span></p>
+                <button onclick="buyBusiness()">Buy</button>
+            </div>
+            
+            <div class="upgrade" id="upgrade-factory">
+                <h3>Factory</h3>
+                <p>Earns $20 every second</p>
+                <p class="cost">Cost: $<span id="factory-cost">3000</span></p>
+                <p class="owned">Owned: <span id="factories">0</span></p>
+                <button onclick="buyFactory()">Buy</button>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <h3>Statistics</h3>
+            <p>Total money earned: $<span id="total-earned">0</span></p>
+            <p>Total clicks: <span id="total-clicks">0</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let money = 0;
+        let totalEarned = 0;
+        let totalClicks = 0;
+        
+        // Click upgrades
+        let clickValue = 1;
+        let clickUpgrades = 0;
+        let clickUpgradeCost = 10;
+        
+        // Auto clickers
+        let autoUpgrades = 0;
+        let autoUpgradeCost = 50;
+        let autoValue = 0.1;
+        
+        // Businesses
+        let businesses = 0;
+        let businessCost = 500;
+        let businessValue = 5;
+        
+        // Factories
+        let factories = 0;
+        let factoryCost = 3000;
+        let factoryValue = 20;
+        
+        // DOM elements
+        const moneyElement = document.getElementById('money');
+        const moneyPerSecondElement = document.getElementById('money-per-second');
+        const clickArea = document.getElementById('click-area');
+        const clickValueElement = document.getElementById('click-value');
+        
+        // Update the game display
+        function updateDisplay() {
+            moneyElement.textContent = Math.floor(money).toLocaleString();
+            clickValueElement.textContent = clickValue;
+            
+            // Calculate money per second
+            const moneyPerSecond = (autoUpgrades * autoValue) + 
+                                  (businesses * businessValue) + 
+                                  (factories * factoryValue);
+            moneyPerSecondElement.textContent = `($${moneyPerSecond.toFixed(1)} per second)`;
+            
+            // Update upgrade costs
+            document.getElementById('click-upgrade-cost').textContent = clickUpgradeCost;
+            document.getElementById('auto-upgrade-cost').textContent = autoUpgradeCost;
+            document.getElementById('business-cost').textContent = businessCost;
+            document.getElementById('factory-cost').textContent = factoryCost;
+            
+            // Update owned counts
+            document.getElementById('click-upgrades').textContent = clickUpgrades;
+            document.getElementById('auto-upgrades').textContent = autoUpgrades;
+            document.getElementById('businesses').textContent = businesses;
+            document.getElementById('factories').textContent = factories;
+            
+            // Update statistics
+            document.getElementById('total-earned').textContent = Math.floor(totalEarned).toLocaleString();
+            document.getElementById('total-clicks').textContent = totalClicks.toLocaleString();
+            
+            // Enable/disable buttons based on affordability
+            document.querySelector('#upgrade-click button').disabled = money < clickUpgradeCost;
+            document.querySelector('#upgrade-auto button').disabled = money < autoUpgradeCost;
+            document.querySelector('#upgrade-business button').disabled = money < businessCost;
+            document.querySelector('#upgrade-factory button').disabled = money < factoryCost;
+        }
+        
+        // Click handler
+        clickArea.addEventListener('click', function() {
+            money += clickValue;
+            totalEarned += clickValue;
+            totalClicks++;
+            updateDisplay();
+        });
+        
+        // Upgrade functions
+        function buyClickUpgrade() {
+            if (money >= clickUpgradeCost) {
+                money -= clickUpgradeCost;
+                clickValue += 1;
+                clickUpgrades++;
+                clickUpgradeCost = Math.floor(clickUpgradeCost * 1.5);
+                updateDisplay();
+            }
+        }
+        
+        function buyAutoUpgrade() {
+            if (money >= autoUpgradeCost) {
+                money -= autoUpgradeCost;
+                autoUpgrades++;
+                autoUpgradeCost = Math.floor(autoUpgradeCost * 1.5);
+                updateDisplay();
+            }
+        }
+        
+        function buyBusiness() {
+            if (money >= businessCost) {
+                money -= businessCost;
+                businesses++;
+                businessCost = Math.floor(businessCost * 1.5);
+                updateDisplay();
+            }
+        }
+        
+        function buyFactory() {
+            if (money >= factoryCost) {
+                money -= factoryCost;
+                factories++;
+                factoryCost = Math.floor(factoryCost * 1.5);
+                updateDisplay();
+            }
+        }
+        
+        // Game loop for passive income
+        setInterval(function() {
+            const passiveIncome = (autoUpgrades * autoValue) + 
+                                 (businesses * businessValue) + 
+                                 (factories * factoryValue);
+            money += passiveIncome;
+            totalEarned += passiveIncome;
+            updateDisplay();
+        }, 1000);
+        
+        // Initialize the game
+        updateDisplay();
+    </script>
+</body>
+  </html>
