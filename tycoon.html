@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Tycoon Game</title>
+    <title>Business Tycoon</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -14,6 +14,7 @@
             color: #333;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: manipulation;
         }
         
         h1 {
@@ -45,6 +46,7 @@
             cursor: pointer;
             margin: 20px 0;
             transition: transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .click-area:active {
@@ -133,7 +135,7 @@
                 <p>Increase money per click by 1</p>
                 <p class="cost">Cost: $<span id="click-upgrade-cost">10</span></p>
                 <p class="owned">Owned: <span id="click-upgrades">0</span></p>
-                <button onclick="buyClickUpgrade()">Buy</button>
+                <button id="click-upgrade-btn">Buy</button>
             </div>
             
             <div class="upgrade" id="upgrade-auto">
@@ -141,7 +143,7 @@
                 <p>Earn money automatically</p>
                 <p class="cost">Cost: $<span id="auto-upgrade-cost">50</span></p>
                 <p class="owned">Owned: <span id="auto-upgrades">0</span></p>
-                <button onclick="buyAutoUpgrade()">Buy</button>
+                <button id="auto-upgrade-btn">Buy</button>
             </div>
             
             <div class="upgrade" id="upgrade-business">
@@ -149,7 +151,7 @@
                 <p>Earns $5 every second</p>
                 <p class="cost">Cost: $<span id="business-cost">500</span></p>
                 <p class="owned">Owned: <span id="businesses">0</span></p>
-                <button onclick="buyBusiness()">Buy</button>
+                <button id="business-btn">Buy</button>
             </div>
             
             <div class="upgrade" id="upgrade-factory">
@@ -157,7 +159,7 @@
                 <p>Earns $20 every second</p>
                 <p class="cost">Cost: $<span id="factory-cost">3000</span></p>
                 <p class="owned">Owned: <span id="factories">0</span></p>
-                <button onclick="buyFactory()">Buy</button>
+                <button id="factory-btn">Buy</button>
             </div>
         </div>
         
@@ -200,27 +202,6 @@
         const clickArea = document.getElementById('click-area');
         const clickValueElement = document.getElementById('click-value');
         
-        // Communication with Godot
-        function setupGodotCommunication() {
-            // Handle messages from Godot
-            window.gotMessage = function(message) {
-                console.log("Message from Godot:", message);
-                // You can add specific message handling here if needed
-            };
-            
-            // Send message to Godot (example)
-            function sendToGodot(message) {
-                if (window.gotSendMessage) {
-                    window.gotSendMessage(message);
-                } else {
-                    console.log("Message to Godot:", message);
-                }
-            }
-            
-            // Initialize communication
-            sendToGodot("HTML_READY");
-        }
-        
         // Update the game display
         function updateDisplay() {
             moneyElement.textContent = Math.floor(money).toLocaleString();
@@ -249,10 +230,10 @@
             document.getElementById('total-clicks').textContent = totalClicks.toLocaleString();
             
             // Enable/disable buttons based on affordability
-            document.querySelector('#upgrade-click button').disabled = money < clickUpgradeCost;
-            document.querySelector('#upgrade-auto button').disabled = money < autoUpgradeCost;
-            document.querySelector('#upgrade-business button').disabled = money < businessCost;
-            document.querySelector('#upgrade-factory button').disabled = money < factoryCost;
+            document.getElementById('click-upgrade-btn').disabled = money < clickUpgradeCost;
+            document.getElementById('auto-upgrade-btn').disabled = money < autoUpgradeCost;
+            document.getElementById('business-btn').disabled = money < businessCost;
+            document.getElementById('factory-btn').disabled = money < factoryCost;
         }
         
         // Click handler
@@ -262,94 +243,90 @@
             totalClicks++;
             updateDisplay();
             
-            // Send click event to Godot if needed
-            if (window.gotSendMessage) {
-                window.gotSendMessage("CLICK");
-            }
+            // Visual feedback
+            clickArea.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                clickArea.style.transform = 'scale(1)';
+            }, 100);
         }
         
-        // Set up event listeners with proper Godot-WRY compatibility
+        // Setup event listeners
         function setupEventListeners() {
-            // Mouse click event
-            clickArea.addEventListener('mousedown', function(e) {
-                e.preventDefault();
-                handleClick();
-                return false;
-            });
+            // Mouse events
+            clickArea.addEventListener('mousedown', handleClick);
             
-            // Touch event for mobile support
+            // Touch events
             clickArea.addEventListener('touchstart', function(e) {
                 e.preventDefault();
                 handleClick();
-                return false;
+            }, {passive: false});
+            
+            // Prevent context menu on right click
+            clickArea.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
             });
-        }
-        
-        // Upgrade functions
-        function buyClickUpgrade() {
-            if (money >= clickUpgradeCost) {
-                money -= clickUpgradeCost;
-                clickValue += 1;
-                clickUpgrades++;
-                clickUpgradeCost = Math.floor(clickUpgradeCost * 1.5);
-                updateDisplay();
-            }
-        }
-        
-        function buyAutoUpgrade() {
-            if (money >= autoUpgradeCost) {
-                money -= autoUpgradeCost;
-                autoUpgrades++;
-                autoUpgradeCost = Math.floor(autoUpgradeCost * 1.5);
-                updateDisplay();
-            }
-        }
-        
-        function buyBusiness() {
-            if (money >= businessCost) {
-                money -= businessCost;
-                businesses++;
-                businessCost = Math.floor(businessCost * 1.5);
-                updateDisplay();
-            }
-        }
-        
-        function buyFactory() {
-            if (money >= factoryCost) {
-                money -= factoryCost;
-                factories++;
-                factoryCost = Math.floor(factoryCost * 1.5);
-                updateDisplay();
-            }
+            
+            // Upgrade buttons
+            document.getElementById('click-upgrade-btn').addEventListener('click', function() {
+                if (money >= clickUpgradeCost) {
+                    money -= clickUpgradeCost;
+                    clickValue += 1;
+                    clickUpgrades++;
+                    clickUpgradeCost = Math.floor(clickUpgradeCost * 1.5);
+                    updateDisplay();
+                }
+            });
+            
+            document.getElementById('auto-upgrade-btn').addEventListener('click', function() {
+                if (money >= autoUpgradeCost) {
+                    money -= autoUpgradeCost;
+                    autoUpgrades++;
+                    autoUpgradeCost = Math.floor(autoUpgradeCost * 1.5);
+                    updateDisplay();
+                }
+            });
+            
+            document.getElementById('business-btn').addEventListener('click', function() {
+                if (money >= businessCost) {
+                    money -= businessCost;
+                    businesses++;
+                    businessCost = Math.floor(businessCost * 1.5);
+                    updateDisplay();
+                }
+            });
+            
+            document.getElementById('factory-btn').addEventListener('click', function() {
+                if (money >= factoryCost) {
+                    money -= factoryCost;
+                    factories++;
+                    factoryCost = Math.floor(factoryCost * 1.5);
+                    updateDisplay();
+                }
+            });
         }
         
         // Game loop for passive income
         function gameLoop() {
             const passiveIncome = (autoUpgrades * autoValue) + 
-                                 (businesses * businessValue) + 
-                                 (factories * factoryValue);
+                                (businesses * businessValue) + 
+                                (factories * factoryValue);
             money += passiveIncome;
             totalEarned += passiveIncome;
             updateDisplay();
-            
-            // Request next frame
             requestAnimationFrame(gameLoop);
         }
         
         // Initialize the game
-        function initGame() {
-            setupGodotCommunication();
+        function init() {
             setupEventListeners();
             updateDisplay();
+            gameLoop();
             
-            // Start game loop using requestAnimationFrame for smoother performance
-            requestAnimationFrame(gameLoop);
-            
-            // Also keep the interval for passive income (compatibility)
+            // Fallback interval for passive income
             setInterval(function() {
                 const passiveIncome = (autoUpgrades * autoValue) + 
-                                     (businesses * businessValue) + 
-                                     (factories * factoryValue);
+                                    (businesses * businessValue) + 
+                                    (factories * factoryValue);
                 money += passiveIncome;
                 totalEarned += passiveIncome;
                 updateDisplay();
@@ -357,7 +334,7 @@
         }
         
         // Start the game when the page loads
-        window.addEventListener('load', initGame);
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
